@@ -1,6 +1,32 @@
+"""
+
+This module contains functions for oil price analysis.
+
+Available functions
+-------------------
+
+data_cleaning() 
+    Imports the data from "oil_raw_data.txt", cleans it and creates a "oil.txt" file.
+    
+info_to_dictionary()
+    Imports the data from "oil.txt" and stores the information in a dictionary oil_dicit.
+    
+highlow(list_of_dates_changed, list_of_prices)
+    Prints the date for the highest or the lowest oil price.
+    
+display()
+    Displays either the price or the volume for a specified date.
+
+"""
+
+
 oil_dicit = {}                      #dictionary for exercise F) 
 
 def data_cleaning():        # this is for exercise 1d)
+    """    
+    This function imports the data from "oil_raw_data.txt", cleans it, transforms the date format and creates a "oil.txt" file with cleaned data, separated by a comma. 
+                
+    """
 
     #a) Read data from .txt file and store in 3 lists
     raw_data = "oil_raw_data.txt"       # storing the text file in a variable
@@ -66,6 +92,21 @@ def data_cleaning():        # this is for exercise 1d)
 # f) Make a function which imports the text in "oil.txt" and stores the information in a dictionary. The date is the key in the key-value pair and the price and volume is the value in the key-value pair. Make sure to check for invalid input from the user.            
             
 def info_to_dicitonary():
+    """    
+    This function imports the data from "oil.txt", stores the information in a dictionary oil_dicit and returns lists of dates, volumes and prices. 
+    
+    Returns
+    -------
+    list_of_dates: list
+    A list of dates for which oil prices are available.  
+
+    list_of_prices: list
+    A list of oil prices in USD on a specific day.
+
+    list_of_volumes: list
+    A list of numbers of traded oil contracts in a day.  
+       
+    """
     
     data = "oil.txt"                    # storing the text file in a variable
     data_opened = open(data,"r")        # Opening the data in read mode
@@ -94,7 +135,18 @@ list_of_dates, list_of_prices, list_of_volumes = info_to_dicitonary()
 
 # e) Write a function which displays the date of the highest or lowest oil price, including the price. The user has to specify whether the maximum or minimum price should be displayed. Make sure to check for invalid input from the user.
 
-def highlow(list_of_dates_changed, list_of_prices):   # this is for exercise 1e)
+def highlow(list_of_dates, list_of_prices):   # this is for exercise 1e)
+    """    
+    This function prints the date for the highest or the lowest oil price from the available data. 
+    
+    Parameters
+    ----------
+    list_of_dates: list
+    A list of dates for which oil prices are available.   
+    
+    list_of_prices: list
+    A list of oil prices in USD on a specific day.     
+    """
     
     list_of_prices_float = []                      #Create new list where prices are in floats
     for item in list_of_prices:                    #Iterate over every index of lines in the list
@@ -108,7 +160,7 @@ def highlow(list_of_dates_changed, list_of_prices):   # this is for exercise 1e)
         if user_input == "highest":                        #When input is "highest"
             max_price = max(list_of_prices_float)          #Function to find the maximum price
             maxpos = list_of_prices_float.index(max_price) #Function to find the position of maximum 
-            max_price_date = list_of_dates_changed[maxpos] #Function to find the corrosponding date in list
+            max_price_date = list_of_dates[maxpos] #Function to find the corrosponding date in list
 
             print("\nThe highest oil price is: " + str(max_price) + ", on the date of " +str(max_price_date)) #print all data
             user_input = ""                                #To make the while function stop
@@ -116,7 +168,7 @@ def highlow(list_of_dates_changed, list_of_prices):   # this is for exercise 1e)
         elif user_input == "lowest":                       #When input is "lowest"
             min_price = min(list_of_prices_float)          #Function to find the maximum price
             minpos = list_of_prices_float.index(min_price) #Function to find the position of maximum 
-            min_price_date = list_of_dates_changed[minpos] #Function to find the corrosponding date in list
+            min_price_date = list_of_dates[minpos] #Function to find the corrosponding date in list
 
             print("\nThe lowest oil price is: " + str(min_price) + ", on the date of " +str(min_price_date)) #print all data
             user_input = ""                                #To make the while function stop
@@ -134,6 +186,10 @@ def highlow(list_of_dates_changed, list_of_prices):   # this is for exercise 1e)
 # G) Make a function which asks for a date and displays either the date and price, or the date and volume. Make sure to check for invalid input from the user.
 
 def display():
+    """    
+    This function asks for a date and displays either the date and price, or the date and volume, depending on user input.
+                
+    """
     
     print("Give a date to display either the price or volume.")  #Give user information
     date = input("Input must be 'yyyy/mm/dd': ")                 #Let user give input date

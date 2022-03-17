@@ -4,7 +4,7 @@ This is a Group Assignment for the Introduction to Programming course, Spring 20
 
 Lecturer: Erik Smith-Meyer
 
-Prepared by: Robert-Erik Lars Wilm Kollenbaum, Hessel Jan van Lier Lels and Aleksejs Popovs.
+Prepared by: Robert-Erik Lars Wilm Kollenbaum, Hessel Jan van Lier Lels and Aleksejs Popovs (Group 14).
 
 '''
 
