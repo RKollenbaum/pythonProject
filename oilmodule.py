@@ -129,8 +129,6 @@ def info_to_dicitonary():
         counter = counter + 1                     #Add 1 to counter
     
     return list_of_dates, list_of_prices, list_of_volumes 
-
-list_of_dates, list_of_prices, list_of_volumes = info_to_dicitonary()
     
 
 # e) Write a function which displays the date of the highest or lowest oil price, including the price. The user has to specify whether the maximum or minimum price should be displayed. Make sure to check for invalid input from the user.

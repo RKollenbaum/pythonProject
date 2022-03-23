@@ -14,7 +14,7 @@ print('This program provides several tools to analyse oil prices.') #explain the
 print('The data needed for the operation of the program is stored in the file oil_raw_data.txt.')
 
 om.data_cleaning() #import the data from oil_raw_data.txt, clean it and create a file oil.txt with cleaned data
-om.info_to_dicitonary() #import the cleaned data and create a dictionary oil_dicit where dates, prices and volumes are stored
+list_of_dates, list_of_prices, list_of_values = om.info_to_dicitonary() #import the cleaned data, create a dictionary oil_dicit where dates, prices and volumes are stored and store the data in lists
 
 end = False #initalize a boolean variable for the menu while loop
 
@@ -37,7 +37,7 @@ while end != True: #menu while loop
         om.info_to_dicitonary() #re-import the cleaned data and create a dictionary oil_dicit where dates, prices and volumes are stored
     
     elif entry == "2": #if the user chooses the 2nd option... 
-        om.highlow(om.list_of_dates, om.list_of_prices) #activate the function which returns the highest or the lowest oil price in USD
+        om.highlow(list_of_dates, list_of_prices) #activate the function which returns the highest or the lowest oil price in USD
         
     elif entry == "3": #if the user chooses the 3rd option... 
         om.display() #activate the function which prints the price or volume for a specified date
