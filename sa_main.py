@@ -115,7 +115,7 @@ def plot_returns_scores(sp500):
 
 
 
-print('-'*70)
+print('-'*70) #print the greeting message
 print('This program provides data analysis that helps inspect the effect of different business models and product strategies on firm performance.')
 print('It uses the data of S&P500 companies from 3 sectors: Financials, Industrials and Information Technology.\n')
 
