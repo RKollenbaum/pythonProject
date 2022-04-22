@@ -162,8 +162,83 @@ def plot_distributions(sp500):
     plt.savefig('S&P500_ScoresDistributions.png', bbox_inches='tight') #save the plot as a png file
     plt.show() #show the plot
 
+ def plot_sectors_histogram(sp500):
+    """
+    This function plots three bar plots where the each sector yearly returns histogram are on the y-axis of each the historgram amount is located on the x-axis.
+
+    Parameters
+    ----------
+    sp500 : DataFrame
+        Contains information about S&P500 companies (IT, Industrial and Financial Sectors): their market values, yearly stock returns and product strategy/business model scores.
+
+    Returns
+    -------
+    None.
+
+    """
+
+    financials = sp500[sp500['Sector'] == 'Financials']     #Filter sp500 for only 'Financials' Sector
+    industrials = sp500[sp500['Sector'] == 'Industrials']   #Filter sp500 for only 'Industrials' Sector
+    it = sp500[sp500['Sector'] == 'Information Technology'] #Filter sp500 for only 'Information Technology' Sector
+
+    fig, ax = plt.subplots(nrows = 1, ncols = 3, figsize = (20, 5)) #create a figure and an array of subplots
+
+    ax[0].hist(financials['Returns'], bins = 20, color='red', alpha = 0.5)   #draw histogram plot 0
+    ax[1].hist(industrials['Returns'], bins = 20, color='blue', alpha = 0.5) #draw histogram plot 1
+    ax[2].hist(it['Returns'], bins = 20, color='orange', alpha = 0.5)        #draw histogram plot 2
 
 
+    ax[0].set_title('Yearly return by financials', fontsize = 16)             #Set title for plot 0
+    ax[1].set_title('Yearly return by industrials', fontsize = 16)            #Set title for plot 1
+    ax[2].set_title('Yearly return by information technology', fontsize = 16) #Set title for plot 2
+
+    fig.suptitle('Histogram of the yearly returns within each sector \n S&P500 (Financials, Industrials, IT)', fontsize = 20, y = 1.20) #set the title of the whole figure
+    
+    plt.show() #show the plot
+    
+    
+def regression_model(sp500):
+    """
+    This function presents three variation in returns. The first one is the returns from the sp500. 
+    The second and third are expected returns with made up: Differentiation, Cost leadership, Efficiency, Novelty.
+
+    Parameters
+    ----------
+    sp500 : DataFrame
+        Contains information about S&P500 companies (IT, Industrial and Financial Sectors): their market values, yearly stock returns and product strategy/business model scores.
+
+    Returns
+    -------
+    None.
+
+    """
+    
+    X = sp500[['Differentiation', 'Cost leadership', 'Efficiency', 'Novelty']] # Get 𝛽1𝐷𝑖𝑓𝑓𝑒𝑟𝑒𝑛𝑡𝑖𝑎𝑡𝑖𝑜𝑛 + 𝛽2𝐶𝑜𝑠𝑡 𝑙𝑒𝑎𝑑𝑒𝑟𝑠h𝑖𝑝 + 𝛽3𝐸𝑓𝑓𝑖𝑐𝑖𝑒𝑛𝑐𝑦 + 𝛽 𝑁𝑜𝑣𝑒𝑙𝑡𝑦
+    Y = sp500['Returns'] # Get Returns
+    
+    reg_res = sm.OLS(Y, sm.add_constant(X)).fit() # add constant to X and fit model
+    
+    r_sqrd = reg_res.rsquared_adj #Adjusted R-squared.
+    
+    print('-'*70)
+    
+    #present variation in returns
+    print('Differentiation, Cost leadership, Efficiency and Novelty explain ' +str(round(100*r_sqrd,1)) +' % of the variation in Returns.\n')
+    
+    #present expected variation in returns with fake company
+    print('If a company in the financial sector has a score of: \nDifferentiation: 54 Cost leadership: 61 Efficiency: 57 Novelty: 42.')
+    print('The expected returns would be: ' + str(reg_res.predict([1, 54, 61, 57, 42])) + ".\n")
+    
+    #present expected variation in returns with increased novelty
+    print('If the company managed to increased novelty to 55.')
+    print('The expected returns would be: ' + str(reg_res.predict([1, 54, 61, 57, 55])) + ".")
+    
+    print('-'*70)
+
+    
+    
+    
+    
 print('-'*70) #print the greeting message
 print('This program provides data analysis that helps inspect the effect of different business models and product strategies on firm performance.')
 print('It uses the data of S&P500 companies from 3 sectors: Financials, Industrials and Information Technology.\n')
@@ -190,6 +265,11 @@ plot_returns_scores(sp500) #plot a figure where returns are on the y-axis
                            #and differentiation, cost leadership, efficiency, and novelty - on the x-axis.    
 
 plot_distributions(sp500) #plot histograms which show the distribution of the scores
+
+plot_sectors_histogram(sp500) #plot three histogram where average yearly returns are on the y-axis
+                              #and the different sectors are separated. 
+    
+regression_model(sp500) #present the regression model with expected returns
 
 #the following inactive code was used for distinguishing top-10 companies of each model/strategy score (and returns) rating
 #score = 'Returns'
