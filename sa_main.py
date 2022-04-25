@@ -164,6 +164,41 @@ def plot_distributions(sp500):
     plt.show() #show the plot
 
 
+def plot_average_yearly_returns(sp500):
+    """
+    This function plots a bar plot where the average yearly returns are on the y-axis of each sector located on the x-axis.
+
+    Parameters
+    ----------
+    sp500 : DataFrame
+        Contains information about S&P500 companies (IT, Industrial and Financial Sectors): their market values, yearly stock returns and product strategy/business model scores.
+
+    Returns
+    -------
+    None.
+
+    """
+
+    sector_mean = sp500.groupby('Sector')['Returns'].mean() #calculate mean from each sector well looking at the returns
+    
+    ### Create bar plots
+    fig, ax = plt.subplots(figsize = (8, 4), constrained_layout=True) #create a figure
+
+    # plot
+    ax.bar(['Financials', 'Industrials', 'Information Technology'], sector_mean, 0.6) #draw the bar plot 
+
+    # add label and titles
+    ax.tick_params(axis='x', labelsize= 14) #set the size of the ticks font on the X axis
+    ax.set_ylabel('Average yearly returns', fontsize = 14) #name the Y axis
+    ax.tick_params(axis='y', labelsize= 10) #set the size of the ticks font on the Y axis
+    
+    
+    fig.suptitle('Average yearly returns for each sector \n S&P500 (Financials, Industrials, IT)', fontsize = 20, y = 1.20) #set the title of the whole figure
+    
+
+    plt.show() #show the plot
+    
+    
 def plot_sectors_histogram(sp500):
     """
     This function plots three bar plots where each sector yearly returns histogram are on the y-axis of each the historgram amount is located on the x-axis.
@@ -201,7 +236,7 @@ def plot_sectors_histogram(sp500):
 
 def regression_model(sp500):
     """
-    This function presents three variation in returns. The first one is the returns from the sp500.
+    This function presents three variation in returns. The first one is the returns from the sp500. The regression is also plotted.
     The second and third are expected returns with made up: Differentiation, Cost leadership, Efficiency, Novelty.
 
     Parameters
@@ -218,11 +253,33 @@ def regression_model(sp500):
     X = sp500[['Differentiation', 'Cost leadership', 'Efficiency', 'Novelty']] # Get 𝛽1𝐷𝑖𝑓𝑓𝑒𝑟𝑒𝑛𝑡𝑖𝑎𝑡𝑖𝑜𝑛 + 𝛽2𝐶𝑜𝑠𝑡 𝑙𝑒𝑎𝑑𝑒𝑟𝑠h𝑖𝑝 + 𝛽3𝐸𝑓𝑓𝑖𝑐𝑖𝑒𝑛𝑐𝑦 + 𝛽 𝑁𝑜𝑣𝑒𝑙𝑡𝑦
     Y = sp500['Returns'] # Get Returns
 
-    r_sqrd, reg_res = get_rsquared(X,Y)
+    r_sqrd, reg_res = get_rsquared(X,Y) #run the OLS regression
 
-
+    sectors = ['Financials', 'Industrials', 'Information Technology']
+    colours = ['red', 'blue', 'orange']
+    grouped = sp500.groupby(sp500['Sector'])
+    
+    fig, ax = plt.subplots()
+    for i in range(len(sectors)):
+        ax.scatter(grouped.get_group(sectors[i])['Novelty'], grouped.get_group(sectors[i])['Returns'], color = colours[i], alpha = 0.5, label = sectors[i])
+    
+    X2 = X.copy()  
+    X2 = sm.add_constant(X2)
+    
+    X2, means, means_str = get_means(X2)
+    
+    X['Predicted returns'] = reg_res.predict(X2) #predict the returns using the regression model
+    ax.plot(X['Novelty'], X['Predicted returns'], color = 'black', label = 'Regression line') #plot the regression line
+    
+    ax.set_xlabel('Novelty', fontsize = 12)
+    ax.set_ylabel('Returns', fontsize = 12)
+    ax.set_title('Novelty VS Returns, adjusted$\ R^2 = {:.3f}$'.format(r_sqrd), fontsize = 14)
+    ax.legend()  
+    fig.text(0.1, -0.1, means_str)
+    #plt.savefig('S&P500_Regression.png', bbox_inches='tight') #save the scatter plots
+    plt.show()
+    
     print('-'*70)
-
     #present variation in returns
     print('Differentiation, Cost leadership, Efficiency and Novelty explain ' +str(round(100*r_sqrd,1)) +' % of the variation in Returns.\n')
 
@@ -233,8 +290,36 @@ def regression_model(sp500):
     #present expected variation in returns with increased novelty
     print('If the company managed to increased novelty to 55.')
     print('The expected returns would be: ' + str(reg_res.predict([1, 54, 61, 57, 55])) + ".")
-
     print('-'*70)
+
+
+def get_means(X2):
+    """
+    Returns a list of means of Differentiation, Cost leadership and Efficiency scores, changes the values in X2 to them and returns a string with them.
+
+    Parameters
+    ----------
+    X2 : DataFrame
+        Contains different scores of firms.
+
+    Returns
+    -------
+    X2 : DataFrame
+        Contains different scores of firms, all except Novelty changed to their means.
+    means : list
+        A list of means of scores (except Novelty).
+    means_str : string
+        A string with score names and their mean values.
+
+    """
+    
+    means = [X2['Differentiation'].mean(), X2['Cost leadership'].mean(), X2['Efficiency'].mean()] #create a list of score means
+    X2['Differentiation'] = means[0] #set explanatory variables to their mean (except Novelty)
+    X2['Cost leadership'] = means[1]
+    X2['Efficiency'] = means[2]
+    means_str = 'Differentiation = {:.0f}\nCost leadership = {:.0f}\nEfficiency = {:.0f}'.format(means[0], means[1], means[2]) #create a string with score names and respective means
+    
+    return X2, means, means_str
 
 
 def regression_of_sectors(sp500):
@@ -259,6 +344,7 @@ def regression_of_sectors(sp500):
 
     Sectors_Data = [Financials, Industrials, Information_Technology]
     names_list = ["Financials", "Industrials", "Information Technology"]
+    colours = ['red', 'blue', 'orange']
 
     fig, axs = plt.subplots(nrows = 1, ncols = 3, figsize = (20,5)) #prepare the figure and axis for the scatter plots    
 
@@ -266,23 +352,16 @@ def regression_of_sectors(sp500):
 
         X = o[['Differentiation', 'Cost leadership', 'Efficiency', 'Novelty']]
         Y = o['Returns']
-        r_sqrd, reg_res = get_rsquared(X, Y)
+        r_sqrd, reg_res = get_rsquared(X, Y) #run the OLS regression
         print('-' * 70)
         print('Differentiation, Cost leadership, Efficiency and Novelty explain ' + str(round(100 * r_sqrd, 1)) + ' % of the variation in Returns for companies in the ' + names_list[i] + ' sector.\n')
 
         X2 = X.copy() #copy the DataFrame with explanatory variables
         X2 = sm.add_constant(X2) #add a constant
-        
-        means = [o['Differentiation'].mean(), o['Cost leadership'].mean(), o['Efficiency'].mean()] #create a list of score means
-        
-        
-        X2['Differentiation'] = means[0] #set explanatory variables to their mean (except Novelty)
-        X2['Cost leadership'] = means[1]
-        X2['Efficiency'] = means[2]
-        means_str = 'Differentiation = {:.0f}\nCost leadership = {:.0f}\nEfficiency = {:.0f}'.format(means[0], means[1], means[2]) #create a string with score names and respective means
+        X2, means, means_str = get_means(X2) #make all scores equal to their means (except Novelty), get a list of means of scores and a string with score names and means
         
         o['Predicted returns'] = reg_res.predict(X2) #predict the returns using the regression model
-        axs[i].scatter(o['Novelty'], Y, label = 'Actual values', alpha = 1-i/5) #plot a scatter plot with the novelty score on the X axis and returns on the Y axis
+        axs[i].scatter(o['Novelty'], Y, label = 'Actual values', c = colours[i], alpha = 0.5) #plot a scatter plot with the novelty score on the X axis and returns on the Y axis
         axs[i].plot(o['Novelty'], o['Predicted returns'], color = 'black', label = 'Regression line') #plot the regression line
         
         fig.text(0.25+i/3.1, 0.2, means_str)
@@ -294,13 +373,13 @@ def regression_of_sectors(sp500):
         axs[i].set_title('{}, adjusted$\ R^2 = {:.3f}$'.format(names_list[i], r_sqrd), fontsize = 16) #set the title
         axs[i].legend(fontsize = 14) #show the legend
     
-    
     axs[0].annotate(means_str, xy = (0.04, 0.04), fontsize = 20)
     axs[0].set_ylabel('Returns', fontsize = 16) #name the Y axis
     fig.suptitle('Returns VS Novelty score by sector (other scores set to mean values)', fontsize = 18) #set the title of the figure
     fig.tight_layout() #optimize the padding around subplots.
     #plt.savefig('S&P500_RegressionBySector.png', bbox_inches='tight') #save the scatter plots
     plt.show()
+
 
 def get_rsquared(X,Y):  #for 6c
     """
@@ -330,6 +409,52 @@ def get_rsquared(X,Y):  #for 6c
     return r_sqrd, reg_res
 
 
+def print_count_bysector(sp500):
+    """
+       Prints the number of sampled firms in each sector.
+
+       Parameters
+       ----------
+       sp500 : DataFrame
+           Contains information about S&P500 companies (IT, Industrial and Financial Sectors): their market values, yearly stock returns and product strategy/business model scores.
+
+       Returns
+       -------
+       None.
+
+    """
+    
+    print('-'*70) #present the count of companies in the sample by sector
+    print('Company count by sector: ')
+    print(sp500.groupby(by = 'Sector').size().to_string())
+    print('Total {:23}'.format(len(sp500)))
+    print('-'*70)
+
+
+def plot_returns_distribution(sp500):
+    """
+       Plots the distribution of firms' returns in the sample.
+
+       Parameters
+       ----------
+       sp500 : DataFrame
+           Contains information about S&P500 companies (IT, Industrial and Financial Sectors): their market values, yearly stock returns and product strategy/business model scores.
+
+       Returns
+       -------
+       None.
+
+    """
+    
+    fig, ax = plt.subplots() #plot a histogram with returns distribution
+    ax.hist(sp500['Returns'], bins = 30, rwidth = 0.8, alpha = 0.8)
+    ax.set_xlabel('Returns', fontsize = 12, fontweight = 'bold')
+    ax.set_ylabel('Count', fontsize = 12)
+    ax.set_title('Distribution of Returns', fontsize = 14)
+    #plt.savefig('S&P500_ReturnsDistribution.png', bbox_inches='tight') #save the histogram
+    plt.show()
+
+
 
 print('-'*70) #print the greeting message
 print('This program provides data analysis that helps inspect the effect of different business models and product strategies on firm performance.')
@@ -337,19 +462,9 @@ print('It uses the data of S&P500 companies from 3 sectors: Financials, Industri
 
 sp500 = prepare_dataset() #create the sp500 DataFrame with necessary information
 
-print('-'*70) #present the count of companies in the sample by sector
-print('Company count by sector: ')
-print(sp500.groupby(by = 'Sector').size().to_string())
-print('Total {:23}'.format(len(sp500)))
-print('-'*70)
+print_count_bysector(sp500) #print the number of sampled firms in each sector
 
-fig, ax = plt.subplots() #plot a histogram with returns distribution
-ax.hist(sp500['Returns'], bins = 30, rwidth = 0.8, alpha = 0.8)
-ax.set_xlabel('Returns', fontsize = 12, fontweight = 'bold')
-ax.set_ylabel('Count', fontsize = 12)
-ax.set_title('Distribution of Returns', fontsize = 14)
-#plt.savefig('S&P500_ReturnsDistribution.png', bbox_inches='tight') #save the histogram
-plt.show()
+plot_returns_distribution(sp500) #plot the distribution of firms' returns in the sample
 
 print_descriptives(sp500) #present the descriptive statistics of the dataset
 
@@ -357,6 +472,9 @@ plot_returns_scores(sp500) #plot a figure where returns are on the y-axis
                            #and differentiation, cost leadership, efficiency, and novelty - on the x-axis.
 
 plot_distributions(sp500) #plot histograms which show the distribution of the scores
+
+plot_average_yearly_returns(sp500)#plot a figure where average yearly returns are on the y-axis
+                                    #and Financials, Industrials, Information Technology - on the x-axis.
 
 plot_sectors_histogram(sp500) #plot three histogram where average yearly returns are on the y-axis
                               #and the different sectors are separated.
